@@ -1,8 +1,17 @@
+import { collectDefaultMetrics, register, Counter } from '/usr/local/app/node_modules/prom-client'
+
+const c = new Counter({
+  name: "test_wololo",
+  help: "asdfasfd"
+})
+
 export async function status(ctx: Context, next: () => Promise<any>) {
   const {
     state: { code },
     clients: { status: statusClient },
   } = ctx
+
+  c.inc(10);
 
   console.info('Received code:', code)
 
@@ -22,6 +31,10 @@ export async function status(ctx: Context, next: () => Promise<any>) {
   ctx.status = responseStatus
   ctx.body = data
   ctx.set('Cache-Control', headers['cache-control'])
+
+  ctx.set('Content-Type', register.contentType)
+  ctx.body = register.metrics()
+  ctx.status = 200
 
   await next()
 }
